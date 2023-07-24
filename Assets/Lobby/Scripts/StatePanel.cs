@@ -10,6 +10,12 @@ public class StatePanel : MonoBehaviour
 
     private ClientState state;
 
+    public static StatePanel Instance { get; private set; }
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     void Update()
     {
         if (state == PhotonNetwork.NetworkClientState)

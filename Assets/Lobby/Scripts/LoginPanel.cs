@@ -13,6 +13,14 @@ public class LoginPanel : MonoBehaviour
 
     public void Login()
     {
-        
+        if (idInputField.text == null || idInputField.text == "")
+        {
+            StatePanel.Instance.AddMessage("Player name is null");
+            return;
+        }
+
+        PhotonNetwork.LocalPlayer.NickName = idInputField.text;
+        PhotonNetwork.ConnectUsingSettings();
+
     }
 }
