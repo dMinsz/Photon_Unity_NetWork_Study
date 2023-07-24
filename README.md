@@ -2,6 +2,11 @@
 
 This Project is Simple Photon PUN2 Network Test Project
 
+if you wnat PUN2 detailed Manual check the link below
+
+https://doc.photonengine.com/pun/current/demos-and-tutorials/pun-basics-tutorial/intro
+
+
 # Defendency 
 
 You need Photon  PUN2 Cloud Setup (need App ID)
