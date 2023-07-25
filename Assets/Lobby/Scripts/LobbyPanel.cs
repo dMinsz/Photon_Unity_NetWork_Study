@@ -15,6 +15,11 @@ public class LobbyPanel : MonoBehaviour
         roomDictionary = new Dictionary<string, RoomInfo>();
     }
 
+    private void OnDisable()
+    {
+        roomDictionary.Clear();
+    }
+
     public void UpdateRoomList(List<RoomInfo> roomList)
     {
         // Clear room list
