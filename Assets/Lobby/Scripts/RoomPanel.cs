@@ -1,7 +1,9 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class RoomPanel : MonoBehaviour
 {
@@ -9,29 +11,64 @@ public class RoomPanel : MonoBehaviour
     [SerializeField] PlayerEntry playerEntryPrefab;
     [SerializeField] Button startButton;
 
-    private void OnEnable()
+    private Dictionary<int, PlayerEntry> playerDictionary;
+
+    private void Awake()
     {
-        startButton.gameObject.SetActive(false);
+        playerDictionary = new Dictionary<int, PlayerEntry>();
     }
 
-    public void UpdatePlayerList()
+    private void OnEnable()
     {
-        // Clear player list
-        for (int i = 0; i < playerContent.childCount; i++)
-        {
-            Destroy(playerContent.GetChild(i).gameObject);
-        }
-
-        // Update player list
         foreach (Player player in PhotonNetwork.PlayerList)
         {
             PlayerEntry entry = Instantiate(playerEntryPrefab, playerContent);
             entry.SetPlayer(player);
+            playerDictionary.Add(player.ActorNumber, entry);
         }
 
-        // If master client check all player ready
-        if (PhotonNetwork.IsMasterClient)
-            CheckPlayerReady();
+        PhotonNetwork.LocalPlayer.SetReady(false);
+        PhotonNetwork.LocalPlayer.SetLoad(false);
+
+        AllPlayerReadyCheck();
+        PhotonNetwork.AutomaticallySyncScene = true;
+    }
+
+    private void OnDisable()
+    {
+        foreach (int actorNumber in playerDictionary.Keys)
+        {
+            Destroy(playerDictionary[actorNumber].gameObject);
+        }
+        playerDictionary.Clear();
+
+        PhotonNetwork.AutomaticallySyncScene = false;
+    }
+
+    public void PlayerEnterRoom(Player newPlayer)
+    {
+        PlayerEntry entry = Instantiate(playerEntryPrefab, playerContent);
+        entry.SetPlayer(newPlayer);
+        playerDictionary.Add(newPlayer.ActorNumber, entry);
+        AllPlayerReadyCheck();
+    }
+
+    public void PlayerLeftRoom(Player otherPlayer)
+    {
+        Destroy(playerDictionary[otherPlayer.ActorNumber].gameObject);
+        playerDictionary.Remove(otherPlayer.ActorNumber);
+        AllPlayerReadyCheck();
+    }
+
+    public void PlayerPropertiesUpdate(Player targetPlayer, PhotonHashtable changedProps)
+    {
+        playerDictionary[targetPlayer.ActorNumber].ChangeCustomProperty(changedProps);
+        AllPlayerReadyCheck();
+    }
+
+    public void MasterClientSwitched(Player newMasterClient)
+    {
+        AllPlayerReadyCheck();
     }
 
     public void StartGame()
@@ -47,8 +84,14 @@ public class RoomPanel : MonoBehaviour
         PhotonNetwork.LeaveRoom();
     }
 
-    private void CheckPlayerReady()
+    private void AllPlayerReadyCheck()
     {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            startButton.gameObject.SetActive(false);
+            return;
+        }
+
         int readyCount = 0;
         foreach (Player player in PhotonNetwork.PlayerList)
         {
@@ -56,6 +99,9 @@ public class RoomPanel : MonoBehaviour
                 readyCount++;
         }
 
-        startButton.gameObject.SetActive(readyCount == PhotonNetwork.PlayerList.Length);
+        if (readyCount == PhotonNetwork.PlayerList.Length)
+            startButton.gameObject.SetActive(true);
+        else
+            startButton.gameObject.SetActive(false);
     }
 }

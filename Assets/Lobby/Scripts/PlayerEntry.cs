@@ -3,6 +3,7 @@ using Photon.Realtime;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PlayerEntry : MonoBehaviour
 {
@@ -25,5 +26,18 @@ public class PlayerEntry : MonoBehaviour
         bool ready = player.GetReady();
         ready = !ready;
         player.SetReady(ready);
+    }
+
+    public void ChangeCustomProperty(PhotonHashtable property)
+    {
+        if (property.TryGetValue(CustomProperty.READY, out object value))
+        {
+            bool ready = (bool)value;
+            playerReady.text = ready ? "Ready" : "";
+        }
+        else
+        {
+            playerReady.text = "";
+        }
     }
 }
