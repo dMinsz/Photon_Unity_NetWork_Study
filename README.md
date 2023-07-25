@@ -18,16 +18,19 @@ and you need to Setup PUN2 - free Asset
 
 # Simple ScreenShot
 
-![img](./ReadMe_Image/PhotonTest.png)
+![LobbyScreenshot](./ReadMe_Image/PhotonTest.png)
 
-
+![gameSceneScreenshot](.//ReadMe_Image/GameScene.png)
 
 # Simple features
 
 1. Login
     - just ID Check
 2. Lobby
-   - Create Room Or Join Room Or Random Matching
+    - Create Room Or Join Room Or Random Matching
 3. In Room
-     - check Ready and go Game
+    - check Ready and go Game
 
+4. Game Scene
+    - Move = > WASD(or Arrow key) , Fire => spacebar
+    - Spawn Rock, and Destroy if hit by bullet
