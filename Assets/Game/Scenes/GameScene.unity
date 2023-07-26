@@ -283,7 +283,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   infoText: {fileID: 923515039}
-  startTimer: 3
+  startTimer: 5
+  SpawnStoneTime: 3
 --- !u!1 &699952799
 GameObject:
   m_ObjectHideFlags: 0

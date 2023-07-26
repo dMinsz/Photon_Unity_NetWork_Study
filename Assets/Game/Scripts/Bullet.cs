@@ -23,4 +23,13 @@ public class Bullet : MonoBehaviour
     {
         transform.position += rigid.velocity * lag;
     }
+
+    public void Init(Vector3 position, Quaternion rotation, float lag)
+    {
+        transform.position = position;
+        transform.rotation = rotation;
+
+        rigid.velocity = transform.forward * moveSpeed;
+        transform.position += rigid.velocity * lag;
+    }
 }

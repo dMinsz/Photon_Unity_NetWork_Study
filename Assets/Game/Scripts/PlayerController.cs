@@ -13,12 +13,15 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     [SerializeField] float rotateSpeed;
     [SerializeField] float maxSpeed;
     [SerializeField] Bullet bulletPrefab;
+    [SerializeField] float fireCoolTime;
 
     private PlayerInput input;
     private Rigidbody rigid;
     private Vector2 inputDir;
 
     private int bulletCount;
+    private float lastFireTime = float.MinValue;
+
 
     private void Awake()
     {
@@ -63,12 +66,16 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         transform.Rotate(Vector3.up, input * rotateSpeed * Time.deltaTime);
     }
 
+    //private void Fire()
+    //{
+    //    photonView.RPC("CreateBullet", RpcTarget.All,transform.position,transform.rotation);
+    //    bulletCount++;
+    //}
+
     private void Fire()
     {
-        photonView.RPC("CreateBullet", RpcTarget.All,transform.position,transform.rotation);
-        bulletCount++;
+        photonView.RPC("RequestCreateBullet", RpcTarget.MasterClient, transform.position, transform.rotation);
     }
-
     [PunRPC]
     public void CreateBullet(Vector3 pos, Quaternion rotation , PhotonMessageInfo info)
     {        
@@ -78,6 +85,28 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         bullet.ApplyLag(lag);
 
     }
+
+
+    [PunRPC]
+    public void RequestCreateBullet(Vector3 position, Quaternion rotation, PhotonMessageInfo info)
+    {
+        if (Time.time < lastFireTime + fireCoolTime)
+            return;
+
+        lastFireTime = Time.time;
+        photonView.RPC("ResultCreateBullet", RpcTarget.All, transform.position, transform.rotation, info.SentServerTime);
+    }
+
+    [PunRPC]
+    public void ResultCreateBullet(Vector3 position, Quaternion rotation, double sentServerTime)
+    {
+        float lag = (float)(PhotonNetwork.Time - sentServerTime);
+
+        Bullet bullet = Instantiate(bulletPrefab);
+        bullet.Init(position, rotation, lag);
+        bulletCount++;
+    }
+
 
     private void CheckExitScreen()
     {
