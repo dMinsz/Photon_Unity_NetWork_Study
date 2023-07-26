@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] TMP_Text infoText;
     [SerializeField] float startTimer;
-
+    [SerializeField] int SpawnStoneTime;
     private void Start()
     {
         // Normal game mode
@@ -35,6 +35,16 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         RoomOptions options = new RoomOptions() { IsVisible = false }; // 디버그를 위한방 비공개방으로
         PhotonNetwork.JoinOrCreateRoom("DebugRoom", options, TypedLobby.Default);
+    }
+
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        //migration
+        if (PhotonNetwork.IsMasterClient)
+        {
+            StartCoroutine(SpawnStoneRoutine());
+        }
     }
 
     public override void OnJoinedRoom()
@@ -111,7 +121,9 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         PhotonNetwork.Instantiate("Player", position, rotation, 0);
 
-        StartCoroutine(SpawnStoneRoutine());
+
+        if (PhotonNetwork.IsMasterClient)
+            StartCoroutine(SpawnStoneRoutine());
     }
 
     private void DebugGameStart()
@@ -124,7 +136,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         PhotonNetwork.Instantiate("Player", position, rotation, 0);
 
-        StartCoroutine(SpawnStoneRoutine());
+        if (PhotonNetwork.IsMasterClient)
+            StartCoroutine(SpawnStoneRoutine());
     }
 
     IEnumerator DebugGameSetupDelay()
@@ -148,7 +161,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         while (true)
         {
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(SpawnStoneTime);
 
             Vector2 direction = Random.insideUnitCircle;
             Vector3 position = Vector3.zero;
