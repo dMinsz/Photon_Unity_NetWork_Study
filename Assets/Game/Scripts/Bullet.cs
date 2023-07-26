@@ -18,4 +18,9 @@ public class Bullet : MonoBehaviour
         rigid.velocity = transform.forward * moveSpeed;
         Destroy(gameObject, 3f);
     }
+
+    public void ApplyLag(float lag) 
+    {
+        transform.position += rigid.velocity * lag;
+    }
 }

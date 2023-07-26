@@ -65,14 +65,18 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     private void Fire()
     {
-        photonView.RPC("CreateBullet", RpcTarget.All);
+        photonView.RPC("CreateBullet", RpcTarget.All,transform.position,transform.rotation);
         bulletCount++;
     }
 
     [PunRPC]
-    public void CreateBullet()
-    {
-        Instantiate(bulletPrefab, transform.position, transform.rotation);
+    public void CreateBullet(Vector3 pos, Quaternion rotation , PhotonMessageInfo info)
+    {        
+        float lag = (float)(PhotonNetwork.Time - info.SentServerTime);// data delay compensation
+
+        Bullet bullet = Instantiate(bulletPrefab, pos, rotation);
+        bullet.ApplyLag(lag);
+
     }
 
     private void CheckExitScreen()
@@ -105,7 +109,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
+    { // 변수동기화
         if (stream.IsWriting)
             stream.SendNext(bulletCount);
         else // stream.IsReading
